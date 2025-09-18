@@ -1,0 +1,74 @@
+name: Debug CI Setup
+
+on:
+  workflow_dispatch: # Manual trigger only
+
+jobs:
+  debug-environment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Debug environment
+        run: |
+          echo "=== ENVIRONMENT DEBUG ==="
+          echo "Node version: $(node --version)"
+          echo "NPM version: $(npm --version)"
+          echo "Working directory: $(pwd)"
+          echo ""
+          echo "=== FILE STRUCTURE ==="
+          ls -la
+          echo ""
+          echo "=== PACKAGE.JSON EXISTS? ==="
+          ls -la package.json || echo "No package.json found"
+          echo ""
+          echo "=== CYPRESS FOLDER ==="
+          ls -la cypress/ || echo "No cypress folder"
+          echo ""
+          echo "=== E2E TESTS ==="
+          find . -name "*.cy.js" -type f || echo "No .cy.js files found"
+
+      - name: Try npm install
+        run: |
+          echo "=== INSTALLING DEPENDENCIES ==="
+          if [ -f package.json ]; then
+            npm ci
+            echo "Dependencies installed successfully"
+          else
+            echo "No package.json found - cannot install dependencies"
+            exit 1
+          fi
+
+      - name: Try Cypress install
+        run: |
+          echo "=== INSTALLING CYPRESS BINARY ==="
+          npx cypress install --force
+          echo "=== VERIFYING CYPRESS ==="
+          npx cypress verify
+          echo "=== CYPRESS INFO ==="
+          npx cypress info
+
+      - name: List Cypress files
+        run: |
+          echo "=== CYPRESS STRUCTURE ==="
+          if [ -d cypress ]; then
+            find cypress -type f -name "*.js" | head -20
+            echo ""
+            echo "=== TEST FILES ==="
+            find cypress/e2e -name "*.cy.js" | head -10 || echo "No test files found"
+          else
+            echo "No cypress directory found"
+          fi
+
+      - name: Test simple Cypress command
+        run: |
+          echo "=== TESTING CYPRESS VERSION ==="
+          npx cypress --version
+          echo "=== TESTING CYPRESS RUN (DRY RUN) ==="
+          npx cypress run --help | head -20
