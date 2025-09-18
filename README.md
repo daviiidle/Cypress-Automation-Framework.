@@ -1,6 +1,6 @@
 # Cypress Automation Framework for DemoWebShop
 
-A professional-grade Cypress automation framework using **Faker.js for dynamic data generation** instead of hardcoded test data.
+A professional-grade Cypress automation framework using **Faker.js for dynamic data generation** instead of hardcoded test data. Fully configured for CI/CD with GitHub Actions.
 
 ## 🚀 Key Features
 
@@ -8,9 +8,9 @@ A professional-grade Cypress automation framework using **Faker.js for dynamic d
 - **Dynamic Data Generation** - Faker.js for realistic, unique test data
 - **Data Factories** - Reusable data creation patterns
 - **Test Tagging** - Organized test execution (@smoke, @regression, etc.)
-- **Parallel Execution** - CI/CD ready with GitHub Actions
-- **Rich Reporting** - Mochawesome reports with screenshots/videos
-- **Cross-browser Testing** - Chrome, Firefox support
+- **CI/CD Ready** - GitHub Actions with HTML reporting
+- **Rich HTML Reports** - Mochawesome with charts, colors, and artifacts
+- **Headless & Interactive** - Runs locally and in CI environments
 
 ## 📁 Project Structure
 
@@ -68,26 +68,26 @@ cypress/
 # Clone and install dependencies
 npm install
 
-# Install Cypress binary (Windows users)
+# Install Cypress binary
 npm run cypress:install
 
-# Verify Cypress installation
+# Verify installation
 npm run cypress:verify
 
-# Open Cypress Test Runner
+# Run tests interactively
 npm run cy:open
 
-# Run tests headlessly
+# Run tests in headless mode
 npm run cy:run
 ```
 
 ### 🪟 Windows Users
-**Important:** After `npm install`, run `npm run cypress:install` to download the Cypress binary for Windows.
+After `npm install`, run `npm run cypress:install` to download the Cypress binary.
 
-### 🐧 WSL + Windows Users  
-If using WSL for development but Windows PowerShell for testing:
-- Dependencies installed via WSL ✓
-- **Must run** `npm run cypress:install` **in Windows PowerShell** to get Windows binary
+### 🐧 WSL Users  
+If using WSL for development:
+- Install dependencies in WSL: `npm install`
+- For Windows GUI testing: Run `npm run cypress:install` in Windows PowerShell
 
 ## 🧪 Using Dynamic Data Generation
 
@@ -204,11 +204,21 @@ const user2 = DataGenerator.generateUser();
 
 ## 📈 CI/CD Integration
 
-Configured for GitHub Actions with:
-- Parallel execution across browsers
-- Automatic test reporting
-- Screenshot/video capture on failure
-- Scheduled nightly runs
+✅ **Fully configured GitHub Actions workflow** with:
+- Automatic execution on push/PR to main/develop branches
+- Headless Chrome execution with virtual display
+- HTML report generation with Mochawesome
+- Artifact collection (videos, screenshots, reports)
+- 30-day artifact retention
+
+### 🔄 Manual Workflow Trigger
+You can manually trigger tests from GitHub Actions tab using "Cypress E2E Tests" workflow.
+
+### 📊 Test Reports
+After each CI run, download the `cypress-test-results` artifact containing:
+- **HTML Report** - Full Mochawesome report with charts and colors
+- **Videos** - Test execution recordings
+- **Screenshots** - Failure screenshots
 
 ## 🚀 Running Tests
 
@@ -240,6 +250,30 @@ npx cypress run
 npx cypress verify
 ```
 
+## 🛠️ Troubleshooting
+
+### Common Issues
+
+**"Dependencies lock file not found" in CI:**  
+✅ **Fixed** - CI now uses `npm install` instead of `npm ci` to handle version conflicts.
+
+**"Cannot run tests in CI" or "No display found":**  
+✅ **Fixed** - Virtual display (Xvfb) configured for headless execution.
+
+**"No HTML reports generated":**  
+✅ **Fixed** - Mochawesome reporter properly configured with artifact collection.
+
+### Local Development
+```bash
+# Verify everything is working
+npm run cypress:verify
+npm run cypress:info
+
+# Clean install if needed
+rm -rf node_modules package-lock.json
+npm install
+```
+
 ## 📋 Custom Commands
 
 ```javascript
@@ -253,4 +287,15 @@ cy.addToCart('laptop');
 cy.clearCart();
 ```
 
-This framework demonstrates SDET best practices with dynamic data generation, eliminating the common anti-pattern of hardcoded test data while maintaining realistic and isolated test scenarios.
+## 🎯 Framework Benefits
+
+This framework demonstrates **Senior SDET best practices** with:
+
+✅ **Clean Architecture** - Organized, maintainable code structure  
+✅ **Dynamic Data** - Eliminates hardcoded test data anti-patterns  
+✅ **CI/CD Ready** - Production-ready GitHub Actions integration  
+✅ **Professional Reporting** - Rich HTML reports with visual feedback  
+✅ **Test Isolation** - Each test run uses unique, realistic data  
+✅ **Scalability** - Easily add new tests, pages, and data factories  
+
+Perfect for teams wanting a professional Cypress framework that's ready for production use.
