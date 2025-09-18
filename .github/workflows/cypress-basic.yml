@@ -1,0 +1,66 @@
+name: Basic Cypress Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  basic-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm ci
+          npx cypress install --force
+
+      - name: Setup virtual display
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb google-chrome-stable
+          export DISPLAY=:99
+          Xvfb :99 -screen 0 1280x720x24 > /dev/null 2>&1 &
+          sleep 2
+
+      - name: Run basic test only
+        run: |
+          npx cypress run \
+            --browser chrome \
+            --headless \
+            --spec "cypress/e2e/99-basic-test.cy.js" \
+            --reporter json \
+            --reporter-options "toConsole=true"
+        env:
+          CYPRESS_BASE_URL: https://demowebshop.tricentis.com
+          CYPRESS_HEADLESS: true
+          DISPLAY: ':99'
+          CI: true
+
+      - name: Check results
+        if: always()
+        run: |
+          echo "=== POST-TEST CHECK ==="
+          ls -la cypress/videos/ || echo "No videos"
+          ls -la cypress/screenshots/ || echo "No screenshots"
+          find . -name "*.json" -type f | head -5 || echo "No JSON files"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: basic-test-results
+          path: |
+            cypress/videos
+            cypress/screenshots
+          retention-days: 7

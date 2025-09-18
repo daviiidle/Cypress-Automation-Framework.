@@ -15,7 +15,8 @@
       "WebFetch(domain:demowebshop.tricentis.com)",
       "Bash(rm:*)",
       "Bash(npm run test:registration:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(gh workflow run:*)"
     ],
     "deny": []
   }
