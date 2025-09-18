@@ -1,4 +1,4 @@
-name: Basic Cypress Test
+name: Cypress Automation Framework Tests
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  basic-test:
+  automation-tests:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -56,37 +56,45 @@ jobs:
           echo "Chrome version:"
           google-chrome --version
 
-      - name: Run basic test only
+      - name: Run automation framework tests
         run: |
-          echo "=== RUNNING CYPRESS TEST ==="
+          echo "=== RUNNING CYPRESS AUTOMATION TESTS ==="
           npx cypress run \
             --browser chrome \
             --headless \
-            --spec "cypress/e2e/99-basic-test.cy.js" \
-            --config video=false \
-            --config screenshotOnRunFailure=false \
-            --reporter json \
-            --reporter-options "toConsole=true" || echo "TEST FAILED - checking details..."
+            --spec "cypress/e2e/**/*.cy.js" \
+            --reporter cypress-mochawesome-reporter \
+            --reporter-options "reportDir=cypress/reports,overwrite=false,html=true,json=true,timestamp=mmddyyyy_HHMMss"
         env:
           CYPRESS_BASE_URL: https://demowebshop.tricentis.com
           CYPRESS_HEADLESS: true
+          CYPRESS_VIDEO: true
+          CYPRESS_SCREENSHOTS: true
           DISPLAY: ':99'
           CI: true
 
-      - name: Check results
+      - name: Check test results and artifacts
         if: always()
         run: |
-          echo "=== POST-TEST CHECK ==="
-          ls -la cypress/videos/ || echo "No videos"
-          ls -la cypress/screenshots/ || echo "No screenshots"
-          find . -name "*.json" -type f | head -5 || echo "No JSON files"
+          echo "=== POST-TEST ANALYSIS ==="
+          echo "Videos:"
+          ls -la cypress/videos/ || echo "No videos directory"
+          echo "Screenshots:"
+          ls -la cypress/screenshots/ || echo "No screenshots directory"
+          echo "Reports:"
+          ls -la cypress/reports/ || echo "No reports directory"
+          echo "HTML Reports:"
+          find cypress/reports -name "*.html" -type f || echo "No HTML reports found"
+          echo "JSON Reports:"
+          find cypress/reports -name "*.json" -type f || echo "No JSON reports found"
 
-      - name: Upload artifacts
+      - name: Upload test artifacts
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: basic-test-results
+          name: cypress-test-results
           path: |
             cypress/videos
             cypress/screenshots
-          retention-days: 7
+            cypress/reports
+          retention-days: 30
