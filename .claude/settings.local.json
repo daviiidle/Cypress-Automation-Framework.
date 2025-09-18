@@ -16,7 +16,8 @@
       "Bash(rm:*)",
       "Bash(npm run test:registration:*)",
       "Bash(npm run:*)",
-      "Bash(gh workflow run:*)"
+      "Bash(gh workflow run:*)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }
