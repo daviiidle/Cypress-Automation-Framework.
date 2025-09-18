@@ -4,29 +4,46 @@ class EnvironmentConfig {
   }
 
   getConfig() {
+    // Helper function to get environment variable with fallback
+    const getEnvVar = (key, fallback) => {
+      // Try with CYPRESS_ prefix first (for CI/GitHub Actions)
+      const cypressValue = Cypress.env(key);
+      if (cypressValue !== undefined) {
+        return cypressValue;
+      }
+      
+      // Try without prefix (for local development)
+      const directValue = Cypress.env(key.replace('CYPRESS_', ''));
+      if (directValue !== undefined) {
+        return directValue;
+      }
+      
+      return fallback;
+    };
+
     return {
-      baseUrl: Cypress.env('BASE_URL') || 'https://demowebshop.tricentis.com',
+      baseUrl: getEnvVar('BASE_URL', 'https://demowebshop.tricentis.com'),
       timeout: {
-        default: Cypress.env('DEFAULT_COMMAND_TIMEOUT') || 10000,
-        request: Cypress.env('REQUEST_TIMEOUT') || 10000,
-        response: Cypress.env('RESPONSE_TIMEOUT') || 10000
+        default: parseInt(getEnvVar('DEFAULT_COMMAND_TIMEOUT', '10000')),
+        request: parseInt(getEnvVar('REQUEST_TIMEOUT', '10000')),
+        response: parseInt(getEnvVar('RESPONSE_TIMEOUT', '10000'))
       },
       viewport: {
-        width: Cypress.env('VIEWPORT_WIDTH') || 1280,
-        height: Cypress.env('VIEWPORT_HEIGHT') || 720
+        width: parseInt(getEnvVar('VIEWPORT_WIDTH', '1280')),
+        height: parseInt(getEnvVar('VIEWPORT_HEIGHT', '720'))
       },
       browser: {
-        name: Cypress.env('BROWSER') || 'chrome',
-        headless: Cypress.env('HEADLESS') === 'true'
+        name: getEnvVar('BROWSER', 'chrome'),
+        headless: getEnvVar('HEADLESS', 'false') === 'true'
       },
       reporting: {
-        video: Cypress.env('VIDEO') !== 'false',
-        screenshots: Cypress.env('SCREENSHOTS') !== 'false',
-        reporter: Cypress.env('REPORTER') || 'cypress-mochawesome-reporter'
+        video: getEnvVar('VIDEO', 'true') !== 'false',
+        screenshots: getEnvVar('SCREENSHOTS', 'true') !== 'false',
+        reporter: getEnvVar('REPORTER', 'cypress-mochawesome-reporter')
       },
       testData: {
-        defaultEmail: Cypress.env('TEST_USER_EMAIL') || 'test@example.com',
-        defaultPassword: Cypress.env('TEST_USER_PASSWORD') || 'Test123!'
+        defaultEmail: getEnvVar('TEST_USER_EMAIL', 'test@example.com'),
+        defaultPassword: getEnvVar('TEST_USER_PASSWORD', 'Test123!')
       }
     };
   }

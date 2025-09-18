@@ -43,7 +43,20 @@ jobs:
             --env grepTags="@smoke" \
             --spec "cypress/e2e/**/*.cy.js"
         env:
-          CYPRESS_baseUrl: https://demowebshop.tricentis.com
+          # Map GitHub secrets/variables to Cypress environment
+          CYPRESS_BASE_URL: ${{ vars.CYPRESS_BASE_URL || 'https://demowebshop.tricentis.com' }}
+          CYPRESS_VIEWPORT_WIDTH: ${{ vars.CYPRESS_VIEWPORT_WIDTH || '1280' }}
+          CYPRESS_VIEWPORT_HEIGHT: ${{ vars.CYPRESS_VIEWPORT_HEIGHT || '720' }}
+          CYPRESS_DEFAULT_COMMAND_TIMEOUT: ${{ vars.CYPRESS_DEFAULT_COMMAND_TIMEOUT || '10000' }}
+          CYPRESS_REQUEST_TIMEOUT: ${{ vars.CYPRESS_REQUEST_TIMEOUT || '10000' }}
+          CYPRESS_RESPONSE_TIMEOUT: ${{ vars.CYPRESS_RESPONSE_TIMEOUT || '10000' }}
+          CYPRESS_BROWSER: ${{ vars.CYPRESS_BROWSER || 'chrome' }}
+          CYPRESS_HEADLESS: ${{ vars.CYPRESS_HEADLESS || 'true' }}
+          CYPRESS_VIDEO: ${{ vars.CYPRESS_VIDEO || 'true' }}
+          CYPRESS_SCREENSHOTS: ${{ vars.CYPRESS_SCREENSHOTS || 'true' }}
+          CYPRESS_REPORTER: ${{ vars.CYPRESS_REPORTER || 'cypress-mochawesome-reporter' }}
+          CYPRESS_TEST_USER_EMAIL: ${{ secrets.CYPRESS_TEST_USER_EMAIL || 'test@example.com' }}
+          CYPRESS_TEST_USER_PASSWORD: ${{ secrets.CYPRESS_TEST_USER_PASSWORD || 'Test123!' }}
 
       - name: Upload smoke test artifacts
         uses: actions/upload-artifact@v4
@@ -80,9 +93,20 @@ jobs:
             --headless \
             --spec "cypress/e2e/**/*.cy.js"
         env:
-          CYPRESS_baseUrl: https://demowebshop.tricentis.com
-          CYPRESS_viewportWidth: 1280
-          CYPRESS_viewportHeight: 720
+          # Map GitHub secrets/variables to Cypress environment
+          CYPRESS_BASE_URL: ${{ vars.CYPRESS_BASE_URL || 'https://demowebshop.tricentis.com' }}
+          CYPRESS_VIEWPORT_WIDTH: ${{ vars.CYPRESS_VIEWPORT_WIDTH || '1280' }}
+          CYPRESS_VIEWPORT_HEIGHT: ${{ vars.CYPRESS_VIEWPORT_HEIGHT || '720' }}
+          CYPRESS_DEFAULT_COMMAND_TIMEOUT: ${{ vars.CYPRESS_DEFAULT_COMMAND_TIMEOUT || '10000' }}
+          CYPRESS_REQUEST_TIMEOUT: ${{ vars.CYPRESS_REQUEST_TIMEOUT || '10000' }}
+          CYPRESS_RESPONSE_TIMEOUT: ${{ vars.CYPRESS_RESPONSE_TIMEOUT || '10000' }}
+          CYPRESS_BROWSER: ${{ vars.CYPRESS_BROWSER || 'chrome' }}
+          CYPRESS_HEADLESS: ${{ vars.CYPRESS_HEADLESS || 'true' }}
+          CYPRESS_VIDEO: ${{ vars.CYPRESS_VIDEO || 'true' }}
+          CYPRESS_SCREENSHOTS: ${{ vars.CYPRESS_SCREENSHOTS || 'true' }}
+          CYPRESS_REPORTER: ${{ vars.CYPRESS_REPORTER || 'cypress-mochawesome-reporter' }}
+          CYPRESS_TEST_USER_EMAIL: ${{ secrets.CYPRESS_TEST_USER_EMAIL || 'test@example.com' }}
+          CYPRESS_TEST_USER_PASSWORD: ${{ secrets.CYPRESS_TEST_USER_PASSWORD || 'Test123!' }}
 
       - name: Upload Chrome test results
         uses: actions/upload-artifact@v4
