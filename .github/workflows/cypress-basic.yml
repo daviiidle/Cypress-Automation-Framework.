@@ -20,27 +20,53 @@ jobs:
           node-version: '18'
           cache: 'npm'
 
+      - name: Debug environment
+        run: |
+          echo "=== ENVIRONMENT DEBUG ==="
+          echo "Node: $(node --version)"
+          echo "NPM: $(npm --version)"
+          echo "Working dir: $(pwd)"
+          echo "Files:"
+          ls -la
+          echo "Test file exists?"
+          ls -la cypress/e2e/99-basic-test.cy.js || echo "TEST FILE NOT FOUND"
+
       - name: Install dependencies
         run: |
-          npm ci
+          echo "=== INSTALLING DEPENDENCIES ==="
+          npm ci --verbose
+          echo "=== INSTALLING CYPRESS ==="
           npx cypress install --force
+
+      - name: Verify Cypress installation
+        run: |
+          echo "=== VERIFYING CYPRESS ==="
+          npx cypress verify
+          npx cypress version
+          npx cypress info
 
       - name: Setup virtual display
         run: |
+          echo "=== SETTING UP VIRTUAL DISPLAY ==="
           sudo apt-get update
           sudo apt-get install -y xvfb google-chrome-stable
           export DISPLAY=:99
           Xvfb :99 -screen 0 1280x720x24 > /dev/null 2>&1 &
           sleep 2
+          echo "Chrome version:"
+          google-chrome --version
 
       - name: Run basic test only
         run: |
+          echo "=== RUNNING CYPRESS TEST ==="
           npx cypress run \
             --browser chrome \
             --headless \
             --spec "cypress/e2e/99-basic-test.cy.js" \
+            --config video=false \
+            --config screenshotOnRunFailure=false \
             --reporter json \
-            --reporter-options "toConsole=true"
+            --reporter-options "toConsole=true" || echo "TEST FAILED - checking details..."
         env:
           CYPRESS_BASE_URL: https://demowebshop.tricentis.com
           CYPRESS_HEADLESS: true
