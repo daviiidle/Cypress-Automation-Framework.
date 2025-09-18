@@ -43,7 +43,7 @@ jobs:
           npx cypress run \
             --browser chrome \
             --headless \
-            --spec "cypress/e2e/00-simple-tests.cy.js"
+            --spec "cypress/e2e/99-basic-test.cy.js"
         env:
           CYPRESS_BASE_URL: https://demowebshop.tricentis.com
           CYPRESS_VIEWPORT_WIDTH: 1280

@@ -132,7 +132,7 @@ jobs:
           npx cypress run \
             --browser chrome \
             --headless \
-            --spec "cypress/e2e/00-simple-tests.cy.js" \
+            --spec "cypress/e2e/99-basic-test.cy.js" \
             --no-exit || echo "Test run failed - check logs above"
         env:
           # Full environment for actual test with forced headless

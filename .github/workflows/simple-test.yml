@@ -1,0 +1,63 @@
+name: Ultra Simple Test
+
+on:
+  workflow_dispatch: # Manual trigger only
+
+jobs:
+  basic-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Debug file structure
+        run: |
+          echo "=== FILE STRUCTURE ==="
+          ls -la
+          echo "=== PACKAGE.JSON ==="
+          cat package.json
+          echo "=== CYPRESS FOLDER ==="
+          ls -la cypress/
+          echo "=== E2E TESTS ==="
+          ls -la cypress/e2e/
+
+      - name: Install dependencies
+        run: |
+          echo "=== INSTALLING DEPENDENCIES ==="
+          npm install
+          echo "=== INSTALLING CYPRESS ==="
+          npx cypress install
+
+      - name: Test Cypress binary
+        run: |
+          echo "=== CYPRESS VERSION ==="
+          npx cypress version
+          echo "=== CYPRESS VERIFY ==="
+          npx cypress verify
+
+      - name: Run simplest possible test
+        run: |
+          echo "=== RUNNING CYPRESS TEST ==="
+          npx cypress run \
+            --headless \
+            --browser chrome \
+            --spec "cypress/e2e/99-basic-test.cy.js" \
+            --config video=false \
+            --config screenshotOnRunFailure=false
+        env:
+          CYPRESS_baseUrl: https://demowebshop.tricentis.com
+
+      - name: Check what happened
+        if: always()
+        run: |
+          echo "=== POST-TEST ANALYSIS ==="
+          ls -la cypress/ || echo "No cypress folder"
+          ls -la cypress/videos/ || echo "No videos"
+          ls -la cypress/screenshots/ || echo "No screenshots"
+          echo "=== PROCESS CHECK ==="
+          ps aux | grep chrome || echo "No chrome processes"
