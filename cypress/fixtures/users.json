@@ -1,0 +1,44 @@
+{
+  "note": "This file now contains static validation messages and configuration only. Use DataGenerator and UserFactory for dynamic test data.",
+  "validationMessages": {
+    "email": {
+      "required": "Email is required",
+      "invalid": "Please enter a valid email",
+      "format": "Wrong email"
+    },
+    "password": {
+      "required": "Password is required",
+      "tooShort": "The password should have at least 6 characters",
+      "mismatch": "The password and confirmation password do not match"
+    },
+    "firstName": {
+      "required": "First name is required"
+    },
+    "lastName": {
+      "required": "Last name is required"
+    }
+  },
+  "passwordRequirements": {
+    "minLength": 6,
+    "requireUppercase": false,
+    "requireLowercase": false,
+    "requireNumbers": false,
+    "requireSpecialChars": false
+  },
+  "testScenarios": {
+    "login": [
+      "valid_credentials",
+      "invalid_email",
+      "wrong_password",
+      "empty_fields"
+    ],
+    "registration": [
+      "valid_data",
+      "duplicate_email",
+      "invalid_email_format",
+      "password_too_short",
+      "password_mismatch",
+      "missing_required_fields"
+    ]
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "environments": {
+    "staging": {
+      "baseUrl": "https://staging.demowebshop.tricentis.com",
+      "apiUrl": "https://api-staging.demowebshop.tricentis.com"
+    },
+    "production": {
+      "baseUrl": "https://demowebshop.tricentis.com",
+      "apiUrl": "https://api.demowebshop.tricentis.com"
+    }
+  },
+  "timeouts": {
+    "short": 5000,
+    "medium": 10000,
+    "long": 30000
+  },
+  "retries": {
+    "runMode": 2,
+    "openMode": 0
+  },
+  "browser": {
+    "viewportWidth": 1280,
+    "viewportHeight": 720
+  },
+  "testData": {
+    "maxRetries": 3,
+    "waitTime": 1000,
+    "screenshotOnFailure": true,
+    "videoRecording": true
+  },
+  "notifications": {
+    "email": {
+      "enabled": false,
+      "recipients": ["team@example.com"]
+    },
+    "slack": {
+      "enabled": false,
+      "webhook": ""
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(npx cypress:*)",
+      "Bash(sudo apt-get:*)",
+      "Bash(sudo apt-get install:*)",
+      "Bash(mkdir:*)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(npm rebuild:*)",
+      "Bash(node:*)",
+      "Bash(chmod:*)",
+      "WebFetch(domain:demowebshop.tricentis.com)",
+      "Bash(rm:*)",
+      "Bash(npm run test:registration:*)",
+      "Bash(npm run:*)"
+    ],
+    "deny": []
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "categories": [
+    "Books",
+    "Computers",
+    "Electronics",
+    "Apparel & Shoes",
+    "Digital downloads",
+    "Jewelry",
+    "Gift Cards"
+  ],
+  "searchTerms": [
+    {
+      "term": "laptop",
+      "expectedResults": true,
+      "category": "Computers"
+    },
+    {
+      "term": "book",
+      "expectedResults": true,
+      "category": "Books"
+    },
+    {
+      "term": "phone",
+      "expectedResults": true,
+      "category": "Electronics"
+    },
+    {
+      "term": "xyz123notfound",
+      "expectedResults": false,
+      "expectedMessage": "No products were found"
+    }
+  ],
+  "testProducts": [
+    {
+      "name": "14.1-inch Laptop",
+      "category": "Computers",
+      "expectedPrice": "$1,500.00",
+      "quantity": 2
+    },
+    {
+      "name": "Computing and Internet",
+      "category": "Books",
+      "expectedPrice": "$10.00",
+      "quantity": 1
+    },
+    {
+      "name": "Smartphone",
+      "category": "Electronics",
+      "expectedPrice": "$100.00",
+      "quantity": 1
+    }
+  ],
+  "filterOptions": {
+    "priceRanges": [
+      "Under $25",
+      "$25 - $50",
+      "$50 - $100",
+      "Over $100"
+    ],
+    "sortOptions": [
+      "Name: A to Z",
+      "Name: Z to A", 
+      "Price: Low to High",
+      "Price: High to Low",
+      "Created on"
+    ]
+  }
+}

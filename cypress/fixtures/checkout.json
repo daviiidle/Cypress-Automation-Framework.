@@ -1,0 +1,61 @@
+{
+  "note": "This file now contains static configuration only. Use DataGenerator, AddressFactory, PaymentFactory, and OrderFactory for dynamic test data.",
+  "shippingMethods": [
+    "Ground",
+    "Next Day Air", 
+    "2nd Day Air"
+  ],
+  "paymentTypes": [
+    "credit_card",
+    "paypal",
+    "check",
+    "purchase_order"
+  ],
+  "supportedCountries": [
+    "United States",
+    "Canada",
+    "United Kingdom",
+    "Australia"
+  ],
+  "validTestCreditCards": {
+    "visa": "4111111111111111",
+    "mastercard": "5555555555554444", 
+    "amex": "378282246310005",
+    "declined": "4000000000000002"
+  },
+  "testScenarios": {
+    "guestCheckout": {
+      "enabled": true,
+      "requiresRegistration": false,
+      "allowSaveAddress": false
+    },
+    "registeredUserCheckout": {
+      "enabled": true,
+      "requiresLogin": true,
+      "allowSaveAddress": true,
+      "allowMultipleAddresses": true
+    },
+    "expressCheckout": {
+      "enabled": true,
+      "supportedMethods": ["paypal", "apple_pay", "google_pay"]
+    },
+    "multipleItems": {
+      "enabled": true,
+      "maxItemCount": 10,
+      "supportsBulkDiscount": true
+    }
+  },
+  "validationRules": {
+    "address": {
+      "requiredFields": ["firstName", "lastName", "address1", "city", "zipCode", "country"],
+      "optionalFields": ["company", "address2", "phoneNumber"]
+    },
+    "payment": {
+      "creditCard": {
+        "requiredFields": ["number", "holderName", "expiryMonth", "expiryYear", "cvv"],
+        "numberLength": [13, 19],
+        "cvvLength": [3, 4]
+      }
+    }
+  }
+}
