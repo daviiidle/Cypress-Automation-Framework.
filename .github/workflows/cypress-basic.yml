@@ -34,7 +34,8 @@ jobs:
       - name: Install dependencies
         run: |
           echo "=== INSTALLING DEPENDENCIES ==="
-          npm ci --verbose
+          # Use npm install instead of npm ci to handle version mismatches
+          npm install
           echo "=== INSTALLING CYPRESS ==="
           npx cypress install --force
 
