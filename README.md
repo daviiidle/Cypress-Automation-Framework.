@@ -89,8 +89,6 @@ If using WSL for development but Windows PowerShell for testing:
 - Dependencies installed via WSL ✓
 - **Must run** `npm run cypress:install` **in Windows PowerShell** to get Windows binary
 
-See [WINDOWS_SETUP.md](./WINDOWS_SETUP.md) and [WSL_NOTES.md](./WSL_NOTES.md) for detailed guidance.
-
 ## 🧪 Using Dynamic Data Generation
 
 ### Basic User Creation

@@ -5,277 +5,53 @@ on:
     branches: [ main, develop ]
   pull_request:
     branches: [ main, develop ]
-  workflow_dispatch: # Allows manual trigger
+  workflow_dispatch:
 
 jobs:
-  # Simple smoke test job for quick feedback
-  smoke-tests:
+  cypress-tests:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
 
       - name: Install dependencies
         run: |
-          npm ci
-          npx cypress install --force
+          npm install
+          npx cypress install
 
-      - name: Verify setup
+      - name: Setup virtual display
         run: |
-          npx cypress verify
-          npx cypress info
-          echo "Node: $(node --version)"
-          echo "NPM: $(npm --version)"
-          echo "Files:"
-          ls -la cypress/e2e/ || echo "No e2e folder found"
-
-      - name: Setup virtual display for headless browsers
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y xvfb
+          sudo apt-get update -q
+          sudo apt-get install -y xvfb google-chrome-stable
           export DISPLAY=:99
           Xvfb :99 -screen 0 1280x720x24 > /dev/null 2>&1 &
 
-      - name: Run smoke tests
+      - name: Run Cypress tests
         run: |
           npx cypress run \
             --browser chrome \
             --headless \
-            --env grepTags="@smoke" \
-            --spec "cypress/e2e/**/*.cy.js"
+            --spec "cypress/e2e/**/*.cy.js" \
+            --reporter cypress-mochawesome-reporter \
+            --reporter-options "reportDir=cypress/reports,overwrite=false,html=true,json=true"
         env:
-          # Map GitHub secrets/variables to Cypress environment
-          CYPRESS_BASE_URL: ${{ vars.CYPRESS_BASE_URL || 'https://demowebshop.tricentis.com' }}
-          CYPRESS_VIEWPORT_WIDTH: ${{ vars.CYPRESS_VIEWPORT_WIDTH || '1280' }}
-          CYPRESS_VIEWPORT_HEIGHT: ${{ vars.CYPRESS_VIEWPORT_HEIGHT || '720' }}
-          CYPRESS_DEFAULT_COMMAND_TIMEOUT: ${{ vars.CYPRESS_DEFAULT_COMMAND_TIMEOUT || '10000' }}
-          CYPRESS_REQUEST_TIMEOUT: ${{ vars.CYPRESS_REQUEST_TIMEOUT || '10000' }}
-          CYPRESS_RESPONSE_TIMEOUT: ${{ vars.CYPRESS_RESPONSE_TIMEOUT || '10000' }}
-          CYPRESS_BROWSER: ${{ vars.CYPRESS_BROWSER || 'chrome' }}
-          CYPRESS_HEADLESS: true  # Force headless mode in CI regardless of local .env
-          CYPRESS_VIDEO: ${{ vars.CYPRESS_VIDEO || 'true' }}
-          CYPRESS_SCREENSHOTS: ${{ vars.CYPRESS_SCREENSHOTS || 'true' }}
-          CYPRESS_REPORTER: ${{ vars.CYPRESS_REPORTER || 'cypress-mochawesome-reporter' }}
-          CYPRESS_TEST_USER_EMAIL: ${{ secrets.CYPRESS_TEST_USER_EMAIL || 'test@example.com' }}
-          CYPRESS_TEST_USER_PASSWORD: ${{ secrets.CYPRESS_TEST_USER_PASSWORD || 'Test123!' }}
-          # CI-specific environment to prevent GUI browser launch
+          CYPRESS_BASE_URL: https://demowebshop.tricentis.com
+          CYPRESS_HEADLESS: true
           DISPLAY: ':99'
           CI: true
 
-      - name: Upload smoke test artifacts
+      - name: Upload test artifacts
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: smoke-test-results
+          name: cypress-test-results
           path: |
-            cypress/screenshots
             cypress/videos
-          retention-days: 7
-
-  # Main test job - Chrome browser
-  cypress-chrome:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: |
-          npm ci
-          npx cypress install --force
-
-      - name: Setup virtual display for headless browsers
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y xvfb
-          export DISPLAY=:99
-          Xvfb :99 -screen 0 1280x720x24 > /dev/null 2>&1 &
-
-      - name: Run all tests - Chrome
-        run: |
-          npx cypress run \
-            --browser chrome \
-            --headless \
-            --spec "cypress/e2e/**/*.cy.js"
-        env:
-          # Map GitHub secrets/variables to Cypress environment
-          CYPRESS_BASE_URL: ${{ vars.CYPRESS_BASE_URL || 'https://demowebshop.tricentis.com' }}
-          CYPRESS_VIEWPORT_WIDTH: ${{ vars.CYPRESS_VIEWPORT_WIDTH || '1280' }}
-          CYPRESS_VIEWPORT_HEIGHT: ${{ vars.CYPRESS_VIEWPORT_HEIGHT || '720' }}
-          CYPRESS_DEFAULT_COMMAND_TIMEOUT: ${{ vars.CYPRESS_DEFAULT_COMMAND_TIMEOUT || '10000' }}
-          CYPRESS_REQUEST_TIMEOUT: ${{ vars.CYPRESS_REQUEST_TIMEOUT || '10000' }}
-          CYPRESS_RESPONSE_TIMEOUT: ${{ vars.CYPRESS_RESPONSE_TIMEOUT || '10000' }}
-          CYPRESS_BROWSER: ${{ vars.CYPRESS_BROWSER || 'chrome' }}
-          CYPRESS_HEADLESS: true  # Force headless mode in CI regardless of local .env
-          CYPRESS_VIDEO: ${{ vars.CYPRESS_VIDEO || 'true' }}
-          CYPRESS_SCREENSHOTS: ${{ vars.CYPRESS_SCREENSHOTS || 'true' }}
-          CYPRESS_REPORTER: ${{ vars.CYPRESS_REPORTER || 'cypress-mochawesome-reporter' }}
-          CYPRESS_TEST_USER_EMAIL: ${{ secrets.CYPRESS_TEST_USER_EMAIL || 'test@example.com' }}
-          CYPRESS_TEST_USER_PASSWORD: ${{ secrets.CYPRESS_TEST_USER_PASSWORD || 'Test123!' }}
-          # CI-specific environment to prevent GUI browser launch
-          DISPLAY: ':99'
-          CI: true
-
-      - name: Upload Chrome test results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: chrome-test-results
-          path: |
             cypress/screenshots
-            cypress/videos
             cypress/reports
           retention-days: 30
-
-  # Test report generation with proper HTML reports
-  generate-report:
-    runs-on: ubuntu-latest
-    needs: [smoke-tests, cypress-chrome]
-    if: always()
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js for reports
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-          cache: 'npm'
-
-      - name: Install report dependencies
-        run: |
-          npm ci
-          npm install --save-dev mochawesome mochawesome-merge mochawesome-report-generator
-
-      - name: Download all artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts/
-
-      - name: Debug artifacts structure
-        run: |
-          echo "=== ARTIFACTS DEBUG ==="
-          ls -la artifacts/ || echo "No artifacts directory"
-          find artifacts/ -name "*.json" -type f || echo "No JSON files found"
-          find artifacts/ -name "*.html" -type f || echo "No HTML files found"
-          find artifacts/ -name "mochawesome*" -type f || echo "No mochawesome files found"
-
-      - name: Merge Mochawesome reports
-        run: |
-          mkdir -p consolidated-reports
-          
-          # Find all mochawesome JSON reports
-          JSON_REPORTS=$(find artifacts/ -name "mochawesome*.json" -type f)
-          
-          if [ -n "$JSON_REPORTS" ]; then
-            echo "Found JSON reports:"
-            echo "$JSON_REPORTS"
-            
-            # Merge all JSON reports
-            npx mochawesome-merge "$JSON_REPORTS" > consolidated-reports/merged-report.json
-            echo "✓ Merged JSON reports"
-            
-            # Generate HTML report with full features
-            npx marge consolidated-reports/merged-report.json \
-              --reportDir consolidated-reports \
-              --reportFilename index \
-              --reportTitle "Cypress Test Results" \
-              --reportPageTitle "Cypress E2E Test Report" \
-              --inline true \
-              --charts true \
-              --code true \
-              --autoOpen false \
-              --timestamp longDate \
-              --showPassed true \
-              --showFailed true \
-              --showPending true \
-              --showSkipped true
-            
-            echo "✓ Generated HTML report with full features"
-          else
-            echo "⚠ No mochawesome JSON reports found"
-            
-            # Create a basic HTML report showing the issue
-            cat > consolidated-reports/index.html << 'EOF'
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Cypress Test Results</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        .error { background: #ffe6e6; padding: 20px; border-left: 4px solid #ff0000; }
-        .info { background: #e6f3ff; padding: 20px; border-left: 4px solid #0066cc; }
-    </style>
-</head>
-<body>
-    <h1>Cypress Test Results</h1>
-    <div class="error">
-        <h2>⚠ No Test Reports Generated</h2>
-        <p>The Cypress tests did not generate any mochawesome JSON reports.</p>
-        <p>This indicates that the tests failed to run completely or there was a configuration issue.</p>
-    </div>
-    <div class="info">
-        <h3>Debug Information:</h3>
-        <p><strong>Timestamp:</strong> $(date)</p>
-        <p><strong>Branch:</strong> ${{ github.ref_name }}</p>
-        <p><strong>Commit:</strong> ${{ github.sha }}</p>
-        <p><strong>Workflow:</strong> ${{ github.run_number }}</p>
-    </div>
-</body>
-</html>
-EOF
-          fi
-
-      - name: Create summary report
-        run: |
-          # Create a summary markdown for GitHub
-          cat > consolidated-reports/SUMMARY.md << EOF
-# Cypress Test Results Summary
-
-## Run Information
-- **Timestamp**: $(date)
-- **Branch**: ${{ github.ref_name }}
-- **Commit**: ${{ github.sha }}
-- **Workflow Run**: ${{ github.run_number }}
-
-## Artifacts Analysis
-EOF
-          
-          if [ -d "artifacts/" ]; then
-            VIDEO_COUNT=$(find artifacts/ -name "*.mp4" -type f | wc -l)
-            SCREENSHOT_COUNT=$(find artifacts/ -name "*.png" -type f | wc -l)
-            JSON_COUNT=$(find artifacts/ -name "*.json" -type f | wc -l)
-            
-            echo "- **Videos Generated**: $VIDEO_COUNT" >> consolidated-reports/SUMMARY.md
-            echo "- **Screenshots**: $SCREENSHOT_COUNT" >> consolidated-reports/SUMMARY.md
-            echo "- **JSON Reports**: $JSON_COUNT" >> consolidated-reports/SUMMARY.md
-            echo "" >> consolidated-reports/SUMMARY.md
-            
-            if [ $JSON_COUNT -gt 0 ]; then
-              echo "✅ **HTML Report**: Generated successfully" >> consolidated-reports/SUMMARY.md
-            else
-              echo "❌ **HTML Report**: Not generated (no test data)" >> consolidated-reports/SUMMARY.md
-            fi
-          else
-            echo "❌ **No artifacts found**: Tests likely failed to run" >> consolidated-reports/SUMMARY.md
-          fi
-
-      - name: Upload consolidated HTML reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: cypress-html-reports
-          path: consolidated-reports/
-          retention-days: 90
