@@ -107,6 +107,25 @@ jobs:
           CYPRESS_VIEWPORT_WIDTH: ${{ vars.CYPRESS_VIEWPORT_WIDTH || '1280' }}
           CYPRESS_VIEWPORT_HEIGHT: ${{ vars.CYPRESS_VIEWPORT_HEIGHT || '720' }}
 
+      - name: Setup virtual display for browser testing
+        run: |
+          echo "=== SETTING UP VIRTUAL DISPLAY ==="
+          sudo apt-get update
+          sudo apt-get install -y xvfb google-chrome-stable
+          export DISPLAY=:99
+          Xvfb :99 -screen 0 1280x720x24 > /dev/null 2>&1 &
+          sleep 2
+          echo "✓ Virtual display setup complete"
+
+      - name: Test browser launch
+        run: |
+          echo "=== TESTING BROWSER LAUNCH ==="
+          google-chrome --version
+          echo "Testing headless Chrome launch..."
+          google-chrome --headless --disable-gpu --no-sandbox --disable-dev-shm-usage --version || echo "Chrome headless failed"
+        env:
+          DISPLAY: ':99'
+
       - name: Test actual test run
         run: |
           echo "=== ATTEMPTING SINGLE TEST RUN ==="
@@ -116,7 +135,7 @@ jobs:
             --spec "cypress/e2e/00-simple-tests.cy.js" \
             --no-exit || echo "Test run failed - check logs above"
         env:
-          # Full environment for actual test
+          # Full environment for actual test with forced headless
           CYPRESS_BASE_URL: ${{ vars.CYPRESS_BASE_URL || 'https://demowebshop.tricentis.com' }}
           CYPRESS_VIEWPORT_WIDTH: ${{ vars.CYPRESS_VIEWPORT_WIDTH || '1280' }}
           CYPRESS_VIEWPORT_HEIGHT: ${{ vars.CYPRESS_VIEWPORT_HEIGHT || '720' }}
@@ -124,9 +143,11 @@ jobs:
           CYPRESS_REQUEST_TIMEOUT: ${{ vars.CYPRESS_REQUEST_TIMEOUT || '10000' }}
           CYPRESS_RESPONSE_TIMEOUT: ${{ vars.CYPRESS_RESPONSE_TIMEOUT || '10000' }}
           CYPRESS_BROWSER: ${{ vars.CYPRESS_BROWSER || 'chrome' }}
-          CYPRESS_HEADLESS: ${{ vars.CYPRESS_HEADLESS || 'true' }}
+          CYPRESS_HEADLESS: true  # Force headless in debug too
           CYPRESS_VIDEO: ${{ vars.CYPRESS_VIDEO || 'true' }}
           CYPRESS_SCREENSHOTS: ${{ vars.CYPRESS_SCREENSHOTS || 'true' }}
           CYPRESS_REPORTER: ${{ vars.CYPRESS_REPORTER || 'cypress-mochawesome-reporter' }}
           CYPRESS_TEST_USER_EMAIL: ${{ secrets.CYPRESS_TEST_USER_EMAIL || 'test@example.com' }}
           CYPRESS_TEST_USER_PASSWORD: ${{ secrets.CYPRESS_TEST_USER_PASSWORD || 'Test123!' }}
+          DISPLAY: ':99'
+          CI: true

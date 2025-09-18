@@ -4,8 +4,16 @@ class EnvironmentConfig {
   }
 
   getConfig() {
+    // Detect if we're running in CI environment
+    const isCI = Cypress.env('CI') === true || Cypress.env('CI') === 'true' || process.env.CI === 'true';
+    
     // Helper function to get environment variable with fallback
-    const getEnvVar = (key, fallback) => {
+    const getEnvVar = (key, fallback, ciOverride = null) => {
+      // If in CI and there's a specific CI override, use it
+      if (isCI && ciOverride !== null) {
+        return ciOverride;
+      }
+      
       // Try with CYPRESS_ prefix first (for CI/GitHub Actions)
       const cypressValue = Cypress.env(key);
       if (cypressValue !== undefined) {
@@ -34,7 +42,8 @@ class EnvironmentConfig {
       },
       browser: {
         name: getEnvVar('BROWSER', 'chrome'),
-        headless: getEnvVar('HEADLESS', 'false') === 'true'
+        // Force headless mode in CI, use environment variable for local
+        headless: getEnvVar('HEADLESS', 'false', isCI ? 'true' : null) === 'true'
       },
       reporting: {
         video: getEnvVar('VIDEO', 'true') !== 'false',
@@ -44,7 +53,8 @@ class EnvironmentConfig {
       testData: {
         defaultEmail: getEnvVar('TEST_USER_EMAIL', 'test@example.com'),
         defaultPassword: getEnvVar('TEST_USER_PASSWORD', 'Test123!')
-      }
+      },
+      isCI: isCI
     };
   }
 
